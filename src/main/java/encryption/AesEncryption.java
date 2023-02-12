@@ -2,6 +2,9 @@ package encryption;
 
 public class AesEncryption {
 
+    /*
+        Rijndael Substitution Table
+     */
     public static final byte[] SBOX = {
             0x63, (byte) 0x7C, (byte) 0x77, (byte) 0x7B, (byte) 0xF2, (byte) 0x6B, (byte) 0x6F, (byte) 0xC5, (byte) 0x30, (byte) 0x01, (byte) 0x67, (byte) 0x2B, (byte) 0xFE, (byte) 0xD7, (byte) 0xAB, (byte) 0x76, (byte)
             0xCA, (byte) 0x82, (byte) 0xC9, (byte) 0x7D, (byte) 0xFA, (byte) 0x59, (byte) 0x47, (byte) 0xF0, (byte) 0xAD, (byte) 0xD4, (byte) 0xA2, (byte) 0xAF, (byte) 0x9C, (byte) 0xA4, (byte) 0x72, (byte) 0xC0, (byte)
@@ -21,12 +24,19 @@ public class AesEncryption {
             0x8C, (byte) 0xA1, (byte) 0x89, (byte) 0x0D, (byte) 0xBF, (byte) 0xE6, (byte) 0x42, (byte) 0x68, (byte) 0x41, (byte) 0x99, (byte) 0x2D, (byte) 0x0F, (byte) 0xB0, (byte) 0x54, (byte) 0xBB, (byte) 0x16
     };
 
+    /*
+        Each byte of the state is xor-ed with a byte of the round key.
+     */
     public byte[] addRoundKey(byte[] state, byte[] key) {
         for (int i = 0; i < state.length; i++) {
             state[i] = (byte) (state[i] ^ key[i]);
         }
         return state;
     }
+
+    /*
+        Each byte is replaced with another according to the Rijndael Substitution Table.
+     */
     public byte[] subBytes(byte[] state) {
         for (int i = 0; i < state.length; i++) {
             state[i] = SBOX[state[i] & 0xff];
@@ -34,6 +44,10 @@ public class AesEncryption {
         return state;
     }
 
+    /*
+        A transposition step where the last three rows of the state
+        are shifted cyclically a certain number of steps.
+     */
     public byte[] shiftRows(byte[] state) {
         byte[] temp = new byte[4];
         for (int i = 1; i < 4; i++) {
@@ -48,7 +62,7 @@ public class AesEncryption {
     }
 
     /*
-        |
+        A linear mixing operation which operates on the columns of the state, combining the four bytes in each column.
      */
     public byte[] mixColumns(byte[] state) {
         byte[] tmp = new byte[state.length];
