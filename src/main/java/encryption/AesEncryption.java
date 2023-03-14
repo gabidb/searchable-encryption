@@ -67,10 +67,14 @@ public class AesEncryption {
     public byte[] mixColumns(byte[] state) {
         byte[] tmp = new byte[state.length];
         for (int i = 0; i < state.length; i += 4) {
-            tmp[i] = (byte)(GaloisTables.GaloisMult2[state[i] & 0xff] ^ GaloisTables.GaloisMult3[state[i + 1] & 0xff] ^ state[i + 2] ^ state[i + 3]);
-            tmp[i + 1] = (byte)(state[i] ^ GaloisTables.GaloisMult2[state[i + 1] & 0xff] ^ GaloisTables.GaloisMult3[state[i + 2] & 0xff] ^ state[i + 3]);
-            tmp[i + 2] = (byte)(state[i] ^ state[i + 1] ^ GaloisTables.GaloisMult2[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult3[state[i + 3] & 0xff]);
-            tmp[i + 3] = (byte)(GaloisTables.GaloisMult3[state[i] & 0xff] ^ state[i + 1] ^ state[i + 2] ^ GaloisTables.GaloisMult2[state[i + 3] & 0xff]);
+            tmp[i] = (byte)(GaloisTables.GaloisMult2[state[i] & 0xff]
+                    ^ GaloisTables.GaloisMult3[state[i + 1] & 0xff] ^ state[i + 2] ^ state[i + 3]);
+            tmp[i + 1] = (byte)(state[i] ^ GaloisTables.GaloisMult2[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult3[state[i + 2] & 0xff] ^ state[i + 3]);
+            tmp[i + 2] = (byte)(state[i] ^ state[i + 1] ^ GaloisTables.GaloisMult2[state[i + 2] & 0xff]
+                    ^ GaloisTables.GaloisMult3[state[i + 3] & 0xff]);
+            tmp[i + 3] = (byte)(GaloisTables.GaloisMult3[state[i] & 0xff] ^ state[i + 1] ^ state[i + 2]
+                    ^ GaloisTables.GaloisMult2[state[i + 3] & 0xff]);
         }
         return tmp;
     }

@@ -50,10 +50,14 @@ public class AesDecryption {
     {
         byte[] tmp = new byte[state.length];
         for (int i = 0; i < state.length; i += 4) {
-            tmp[i] = (byte)(GaloisTables.GaloisMult14[state[i] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 1] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 3] & 0xff]);
-            tmp[i + 1] = (byte)(GaloisTables.GaloisMult9[state[i] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 1] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 3] & 0xff]);
-            tmp[i + 2] = (byte)(GaloisTables.GaloisMult13[state[i] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 1] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 3] & 0xff]);
-            tmp[i + 3] = (byte)(GaloisTables.GaloisMult11[state[i] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 1] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 3] & 0xff]);
+            tmp[i] = (byte)(GaloisTables.GaloisMult14[state[i] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult13[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 3] & 0xff]);
+            tmp[i + 1] = (byte)(GaloisTables.GaloisMult9[state[i] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult11[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 3] & 0xff]);
+            tmp[i + 2] = (byte)(GaloisTables.GaloisMult13[state[i] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult14[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 3] & 0xff]);
+            tmp[i + 3] = (byte)(GaloisTables.GaloisMult11[state[i] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult9[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 3] & 0xff]);
         }
         return tmp;
     }

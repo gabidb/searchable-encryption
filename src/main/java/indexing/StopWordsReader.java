@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StopWordsReader {
-    public static List<String> readStopWords(String filePath) {
+    protected static List<String> readStopWords(String filePath) {
         List<String> stopWords = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;

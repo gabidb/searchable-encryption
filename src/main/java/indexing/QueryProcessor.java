@@ -1,29 +1,28 @@
-package queryprocessing;
+package indexing;
 
 import encryption.AES;
-import indexing.InvertedIndex;
-import indexing.Tokenizer;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class QueryProcessor {
-    private final InvertedIndex index;
-    private final AES aes;
-
-    public QueryProcessor(InvertedIndex index, AES aes) {
-        this.index = index;
-        this.aes = aes;
+    public static Set<String> processQuery(String query, InvertedIndex index, int n) {
+        List<String> tokens = Tokenizer.tokenizeQuery(query);
+        n = Math.min(tokens.size(), n);
+        for (int i = n; i > 0; i--) {
+            List<String> ngrams = NgramGenerator.generateNgrams(tokens, i)
+                    .stream()
+                    .map(ngram -> index.aes.encrypt(ngram))
+                    .collect(Collectors.toList());;
+            Set<String> documentIds = new HashSet<>();
+            for (String ngram : ngrams) {
+                List<String> documents = index.getDocumentsByTerm(ngram);
+                documentIds.addAll(documents);
+            }
+            if (!documentIds.isEmpty()) {
+                return documentIds;
+            }
+        }
+        return Collections.emptySet();
     }
-
-//    public List<String> processQuery(String query) {
-//        List<String> tokens = Tokenizer.tokenize(query);
-//        List<String> documentIds = new ArrayList<>();
-//        for (String token : tokens) {
-//            String encrypted_token = aes.encrypt(token);
-//            List<String> documents = index.getDocumentsByTerm(encrypted_token, aes);
-//            documentIds.addAll(documents);
-//        }
-//        return documentIds;
-//    }
 }

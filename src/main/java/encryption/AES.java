@@ -1,6 +1,5 @@
 package encryption;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +10,9 @@ public class AES {
 
     private final int rounds = 10; //10 iterations for AES-128
     private final byte[][] keys;
-    public AES() {
+    public AES(byte[] key) {
         KeySchedule keySchedule = new KeySchedule();
-        keys = keySchedule.keyExpansion(rounds + 1);
+        keys = keySchedule.keyExpansion(rounds + 1, key);
     }
 
     public String encrypt(String plain_text) {
@@ -21,7 +20,6 @@ public class AES {
         StringBuilder sb = new StringBuilder();
         for (String s : strings) {
             byte[] encryptedMessage = encryptBlock(stringToBlock16(s));
-            String encryptedString = Base64.getEncoder().encodeToString(encryptedMessage);
             sb.append(new String(encryptedMessage, StandardCharsets.ISO_8859_1));
         }
         return sb.toString();

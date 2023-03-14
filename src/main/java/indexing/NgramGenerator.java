@@ -26,7 +26,6 @@ public class NgramGenerator {
             }
             ngrams.add(sb.toString().trim()); // add the last n-gram to the list
         }
-        System.out.println(ngrams);
         return ngrams;
     }
 

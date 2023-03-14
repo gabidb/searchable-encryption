@@ -2,19 +2,24 @@ package indexing;
 
 import encryption.AES;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class InvertedIndex {
+
+    protected AES aes;
     private Map<String, List<String>> index;
 
-    public InvertedIndex() {
+    public InvertedIndex(byte[] key) {
+        aes = new AES(key);
         index = new HashMap<>();
     }
 
-    public InvertedIndex(HashMap<String, List<String>> indexList) {
+    public InvertedIndex(byte[] key, HashMap<String, List<String>> indexList) {
+        aes = new AES(key);
         index = indexList;
     }
 
@@ -22,9 +27,11 @@ public class InvertedIndex {
         return index;
     }
 
-    public void addToIndex(String documentID, List<String> tokens, AES aes) {
-        for (String token : tokens) {
-            String encrypted_token = aes.encrypt(token);
+    public void addToIndex(String documentID, File file, int n) {
+        List<String> tokens = Tokenizer.tokenize(file);
+        List<String> ngrams = NgramGenerator.generateNgrams(tokens, n);
+        for (String ngram : ngrams) {
+            String encrypted_token = aes.encrypt(ngram);
             if (!index.containsKey(encrypted_token)) {
                 index.put(encrypted_token, new ArrayList<>());
             }
@@ -32,7 +39,7 @@ public class InvertedIndex {
         }
     }
 
-    public List<String> getDocumentsByTerm(String term, AES aes) {
+    public List<String> getDocumentsByTerm(String term) {
         List<String> documentId_list = new ArrayList<>();
         if (index.containsKey(term)) {
             for (String documentID: index.get(term)) {
