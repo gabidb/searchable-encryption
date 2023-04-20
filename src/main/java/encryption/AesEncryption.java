@@ -1,11 +1,11 @@
 package encryption;
 
-public class AesEncryption {
+class AesEncryption {
 
     /*
         Rijndael Substitution Table
      */
-    public static final byte[] SBOX = {
+    protected static final byte[] SBOX = {
             0x63, (byte) 0x7C, (byte) 0x77, (byte) 0x7B, (byte) 0xF2, (byte) 0x6B, (byte) 0x6F, (byte) 0xC5, (byte) 0x30, (byte) 0x01, (byte) 0x67, (byte) 0x2B, (byte) 0xFE, (byte) 0xD7, (byte) 0xAB, (byte) 0x76, (byte)
             0xCA, (byte) 0x82, (byte) 0xC9, (byte) 0x7D, (byte) 0xFA, (byte) 0x59, (byte) 0x47, (byte) 0xF0, (byte) 0xAD, (byte) 0xD4, (byte) 0xA2, (byte) 0xAF, (byte) 0x9C, (byte) 0xA4, (byte) 0x72, (byte) 0xC0, (byte)
             0xB7, (byte) 0xFD, (byte) 0x93, (byte) 0x26, (byte) 0x36, (byte) 0x3F, (byte) 0xF7, (byte) 0xCC, (byte) 0x34, (byte) 0xA5, (byte) 0xE5, (byte) 0xF1, (byte) 0x71, (byte) 0xD8, (byte) 0x31, (byte) 0x15, (byte)
@@ -27,7 +27,7 @@ public class AesEncryption {
     /*
         Each byte of the state is xor-ed with a byte of the round key.
      */
-    public byte[] addRoundKey(byte[] state, byte[] key) {
+    protected byte[] addRoundKey(byte[] state, byte[] key) {
         for (int i = 0; i < state.length; i++) {
             state[i] = (byte) (state[i] ^ key[i]);
         }
@@ -37,7 +37,7 @@ public class AesEncryption {
     /*
         Each byte is replaced with another according to the Rijndael Substitution Table.
      */
-    public byte[] subBytes(byte[] state) {
+    protected byte[] subBytes(byte[] state) {
         for (int i = 0; i < state.length; i++) {
             state[i] = SBOX[state[i] & 0xff];
         }
@@ -48,7 +48,7 @@ public class AesEncryption {
         A transposition step where the last three rows of the state
         are shifted cyclically a certain number of steps.
      */
-    public byte[] shiftRows(byte[] state) {
+    protected byte[] shiftRows(byte[] state) {
         byte[] temp = new byte[4];
         for (int i = 1; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -64,7 +64,7 @@ public class AesEncryption {
     /*
         A linear mixing operation which operates on the columns of the state, combining the four bytes in each column.
      */
-    public byte[] mixColumns(byte[] state) {
+    protected byte[] mixColumns(byte[] state) {
         byte[] tmp = new byte[state.length];
         for (int i = 0; i < state.length; i += 4) {
             tmp[i] = (byte)(GaloisTables.GaloisMult2[state[i] & 0xff]

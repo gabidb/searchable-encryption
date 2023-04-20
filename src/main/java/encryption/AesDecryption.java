@@ -1,8 +1,11 @@
 package encryption;
 
-public class AesDecryption {
+class AesDecryption {
 
-    public final byte[] INVERSE_SBOX = {
+    /*
+        Rijndael Inverse Substitution Table
+     */
+    protected final byte[] INVERSE_SBOX = {
             0x52, (byte) 0x09, (byte) 0x6A, (byte) 0xD5, (byte) 0x30, (byte) 0x36, (byte) 0xA5, (byte) 0x38, (byte) 0xBF, (byte) 0x40, (byte) 0xA3, (byte) 0x9E, (byte) 0x81, (byte) 0xF3, (byte) 0xD7, (byte) 0xFB, (byte)
             0x7C, (byte) 0xE3, (byte) 0x39, (byte) 0x82, (byte) 0x9B, (byte) 0x2F, (byte) 0xFF, (byte) 0x87, (byte) 0x34, (byte) 0x8E, (byte) 0x43, (byte) 0x44, (byte) 0xC4, (byte) 0xDE, (byte) 0xE9, (byte) 0xCB, (byte)
             0x54, (byte) 0x7B, (byte) 0x94, (byte) 0x32, (byte) 0xA6, (byte) 0xC2, (byte) 0x23, (byte) 0x3D, (byte) 0xEE, (byte) 0x4C, (byte) 0x95, (byte) 0x0B, (byte) 0x42, (byte) 0xFA, (byte) 0xC3, (byte) 0x4E, (byte)
@@ -21,13 +24,20 @@ public class AesDecryption {
             0x17, (byte) 0x2B, (byte) 0x04, (byte) 0x7E, (byte) 0xBA, (byte) 0x77, (byte) 0xD6, (byte) 0x26, (byte) 0xE1, (byte) 0x69, (byte) 0x14, (byte) 0x63, (byte) 0x55, (byte) 0x21, (byte) 0x0C, (byte) 0x7D
     };
 
-    public byte[] invSubBytes(byte[] state) {
+    /*
+        Each byte is replaced with another according to the Rijndael Inverse Substitution Table.
+     */
+    protected byte[] invSubBytes(byte[] state) {
         for (int i = 0; i < state.length; i++) {
             state[i] = INVERSE_SBOX[state[i] & 0xff];
         }
         return state;
     }
-    public byte[] invShiftRows(byte[] state) {
+
+    /*
+        Inverse method of shift rows
+     */
+    protected byte[] invShiftRows(byte[] state) {
         byte[] temp = new byte[4];
         for (int i = 1; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -39,25 +49,40 @@ public class AesDecryption {
         }
         return state;
     }
-    public byte[] addRoundKey(byte[] state, byte[] key) {
+
+    /*
+     Each byte of the state is xor-ed with a byte of the round key.
+    */
+    protected byte[] addRoundKey(byte[] state, byte[] key) {
         for (int i = 0; i < state.length; i++) {
             state[i] = (byte) (state[i] ^ key[i]);
         }
         return state;
     }
 
-    public byte[] invMixColumns(byte[] state)
+    /*
+      Inverse of encryption mix columns
+     */
+    protected byte[] invMixColumns(byte[] state)
     {
         byte[] tmp = new byte[state.length];
         for (int i = 0; i < state.length; i += 4) {
-            tmp[i] = (byte)(GaloisTables.GaloisMult14[state[i] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 1] & 0xff]
-                    ^ GaloisTables.GaloisMult13[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 3] & 0xff]);
-            tmp[i + 1] = (byte)(GaloisTables.GaloisMult9[state[i] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 1] & 0xff]
-                    ^ GaloisTables.GaloisMult11[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 3] & 0xff]);
-            tmp[i + 2] = (byte)(GaloisTables.GaloisMult13[state[i] & 0xff] ^ GaloisTables.GaloisMult9[state[i + 1] & 0xff]
-                    ^ GaloisTables.GaloisMult14[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult11[state[i + 3] & 0xff]);
-            tmp[i + 3] = (byte)(GaloisTables.GaloisMult11[state[i] & 0xff] ^ GaloisTables.GaloisMult13[state[i + 1] & 0xff]
-                    ^ GaloisTables.GaloisMult9[state[i + 2] & 0xff] ^ GaloisTables.GaloisMult14[state[i + 3] & 0xff]);
+            tmp[i] = (byte)(GaloisTables.GaloisMult14[state[i] & 0xff]
+                    ^ GaloisTables.GaloisMult11[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult13[state[i + 2] & 0xff]
+                    ^ GaloisTables.GaloisMult9[state[i + 3] & 0xff]);
+            tmp[i + 1] = (byte)(GaloisTables.GaloisMult9[state[i] & 0xff]
+                    ^ GaloisTables.GaloisMult14[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult11[state[i + 2] & 0xff]
+                    ^ GaloisTables.GaloisMult13[state[i + 3] & 0xff]);
+            tmp[i + 2] = (byte)(GaloisTables.GaloisMult13[state[i] & 0xff]
+                    ^ GaloisTables.GaloisMult9[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult14[state[i + 2] & 0xff]
+                    ^ GaloisTables.GaloisMult11[state[i + 3] & 0xff]);
+            tmp[i + 3] = (byte)(GaloisTables.GaloisMult11[state[i] & 0xff]
+                    ^ GaloisTables.GaloisMult13[state[i + 1] & 0xff]
+                    ^ GaloisTables.GaloisMult9[state[i + 2] & 0xff]
+                    ^ GaloisTables.GaloisMult14[state[i + 3] & 0xff]);
         }
         return tmp;
     }

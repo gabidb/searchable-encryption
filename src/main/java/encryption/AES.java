@@ -1,40 +1,111 @@
 package encryption;
 
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class AES {
 
-    private final int rounds = 10; //10 iterations for AES-128
+    private final int rounds;
     private final byte[][] keys;
+
+    private final Logger logger = Logger.getLogger(getClass().getName());
+
     public AES(byte[] key) {
-        KeySchedule keySchedule = new KeySchedule();
-        keys = keySchedule.keyExpansion(rounds + 1, key);
+        switch (key.length) {
+            case 16:
+                rounds = 10;
+                break;
+            case 24:
+                rounds = 12;
+                break;
+            case 32:
+                rounds = 14;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported key size: " + key.length);
+        }
+        keys = KeySchedule.keyExpansion(rounds + 1, key);
     }
 
-    public String encrypt(String plain_text) {
-        List<String> strings = splitStringIntoBlocks(plain_text, 16);
-        StringBuilder sb = new StringBuilder();
-        for (String s : strings) {
-            byte[] encryptedMessage = encryptBlock(stringToBlock16(s));
-            sb.append(new String(encryptedMessage, StandardCharsets.ISO_8859_1));
+    /**
+     Encrypts the given plain text using AES encryption algorithm in CBC (Cipher Block Chaining) mode.
+     @param plainText the plain text to be encrypted
+     @return the encrypted text in Base64-encoded string format
+     */
+    public String encrypt(String plainText) {
+        try {
+            List<String> strings = splitStringIntoBlocks(plainText, 16);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (String s : strings) {
+                byte[] encryptedMessage = encryptBlock(stringToBlock16(s));
+                outputStream.write(encryptedMessage);
+            }
+            byte[] encryptedData = outputStream.toByteArray();
+            return Base64.getEncoder().encodeToString(encryptedData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return sb.toString();
     }
 
-    public String decrypt(String encrypted_text) {
-        byte[] encryptedBytes = encrypted_text.getBytes(StandardCharsets.ISO_8859_1);
-        StringBuilder sb = new StringBuilder();
-        int blockSize = 16;
-        for (int i = 0; i < encryptedBytes.length; i += blockSize) {
-            byte[] block = Arrays.copyOfRange(encryptedBytes, i, i + blockSize);
-            byte[] decryptedMessage = decryptBlock(block);
-            sb.append(new String(decryptedMessage, StandardCharsets.UTF_8).replaceAll("\0", ""));
+    /**
+     Reads the content of the given file, encrypts it using CBC (Cipher Block Chaining) mode with the specified key and returns the encrypted data
+     @param file the file to encrypt
+     @return the encrypted data as a Base64-encoded string, or null if an error occurred during encryption
+     */
+    public String encryptFile(File file) {
+        try {
+            byte[] data = Files.readAllBytes(file.toPath());
+            String plaintext = new String(data, StandardCharsets.UTF_8);
+            logger.info("File with name: " + file.getName() + " encrypted successfully!");
+            return encrypt(plaintext);
+        } catch (IOException e) {
+            logger.info("File with name: " + file.getName() + " encrypted unsuccessfully!");
+            e.printStackTrace();
+            return null;
         }
-        return sb.toString();
+    }
+
+    /**
+     Decrypts the given encrypted text using AES encryption algorithm in CBC (Cipher Block Chaining) mode.
+     @param encryptedText the encrypted text to decrypt
+     @return the decrypted text, or null if there was an error during decryption
+     */
+    public String decrypt(String encryptedText) {
+        try {
+            byte[] encryptedData = Base64.getDecoder().decode(encryptedText.replaceAll("\\s", "").getBytes(StandardCharsets.UTF_8));
+            List<byte[]> blocks = splitByteArrayIntoBlocks(encryptedData, 16);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (byte[] block : blocks) {
+                byte[] decryptedMessage = decryptBlock(block);
+                outputStream.write(decryptedMessage);
+            }
+            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8).trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /*
+        Splits a byte array into blocks of a specified block size.
+     */
+    public static List<byte[]> splitByteArrayIntoBlocks(byte[] data, int blockSize) {
+        List<byte[]> blocks = new ArrayList<>();
+        int numBlocks = (int) Math.ceil((double) data.length / blockSize);
+        for (int i = 0; i < numBlocks; i++) {
+            int offset = i * blockSize;
+            int length = Math.min(blockSize, data.length - offset);
+            byte[] block = new byte[length];
+            System.arraycopy(data, offset, block, 0, length);
+            blocks.add(block);
+        }
+        return blocks;
     }
 
     /*
@@ -58,6 +129,7 @@ public class AES {
         state = aesEncryption.addRoundKey(state, keys[keys.length - 1]);
         return state;
     }
+
     /*
         The decryptBlock method decrypts each 16-byte block.
      */
@@ -81,6 +153,9 @@ public class AES {
         return state;
     }
 
+    /*
+        Splits a string into blocks of a specified block size.
+     */
     private List<String> splitStringIntoBlocks(String input, int blockSize) {
         List<String> blocks = new ArrayList<>();
         int length = input.length();
@@ -91,6 +166,11 @@ public class AES {
         return blocks;
     }
 
+    /*
+        Converts a string into a byte array block of size 16 by truncating or padding the string to fit into 16 bytes.
+        If the string is less than 16 bytes, it is padded with zeroes. If the string is greater than 16 bytes,
+        it is truncated to the first 16 bytes.
+     */
     private byte[] stringToBlock16(String str) {
         byte[] stringBytes = str.getBytes();
         int len = stringBytes.length;
