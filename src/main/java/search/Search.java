@@ -29,7 +29,7 @@ public class Search {
     public List<String> search(String query, int n) {
         BM25Proximity bm25Proximity = new BM25Proximity(invertedIndex, aes);
         List<String> queryList = QueryProcessor.processQuery(query,n);
-        Map<String, Double> rating = bm25Proximity.search(queryList.toArray(new String[0]));
+        Map<String, Double> rating = bm25Proximity.getBM25score(queryList.toArray(new String[0]));
 
         // Filter out entries with a value of 0 and sort the ratings by descending order of relevance score
         List<Map.Entry<String, Double>> sortedRating = rating.entrySet().stream()

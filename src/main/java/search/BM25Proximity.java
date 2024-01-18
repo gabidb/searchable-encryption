@@ -56,7 +56,7 @@ public class BM25Proximity {
      * @param query_terms An array of query terms to search for in the document collection.
      * @return A map of document IDs to their corresponding relevance scores, where a higher score indicates higher relevance.
      */
-    public Map<String, Double> search(String[] query_terms) {
+    public Map<String, Double> getBM25score(String[] query_terms) {
         Map<String, Double> document_scores = new HashMap<>();
 
         for (Map.Entry<String, Integer> entry : doc_lengths.entrySet()) {
@@ -94,8 +94,13 @@ public class BM25Proximity {
 
     // Calculate the IDF (Inverse Document Frequency) for a given term
     private double getIDF(int doc_freq) {
-        double idf =  Math.log((num_docs - doc_freq + 0.5) / (doc_freq + 0.5));
-        return Math.max(idf, 0.0);
+        /* The IDF formula used in BM25 has a drawback:
+         When used for terms appearing in more than half of the corpus,
+         the value would come out as negative value,
+         resulting in the overall score to become negative.
+         Fix: add 1 to ensure always positive value
+        */
+        return Math.log(1 + (num_docs - doc_freq + 0.5) / (doc_freq + 0.5));
     }
 
 
