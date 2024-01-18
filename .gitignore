@@ -1,5 +1,3 @@
 .DS_Store
 .idea/
-/pom.xml
 /target/
-/src/main/java/encryption/Encryption.java
